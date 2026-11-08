@@ -1,0 +1,161 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // ---- Accounts and roles -------------------------------------------
+    match /users/{uid} {
+      // You can read your own profile; admins can read everyone's.
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+
+      // Self-registration may ONLY create your own profile as an aspirant.
+      allow create: if signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'aspirant'
+        && request.resource.data.keys().hasOnly(['name', 'email', 'role', 'createdAt']);
+
+      // Only admins can change roles, department or level, or remove profiles.
+      allow update, delete: if isAdmin();
+    }
+
+    // ---- Shared campus information -------------------------------------
+    // Any signed-in user can read; only admins can publish or change.
+    match /campuses/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /timetable/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    match /notices/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- Private academic data -----------------------------------------
+    // A student reads only their own enrolments, a lecturer only the
+    // enrolments of courses they teach, and an admin everything.
+    match /enrollments/{id} {
+      allow read: if signedIn()
+        && (resource.data.studentId == request.auth.uid
+            || resource.data.lecturerId == request.auth.uid
+            || isAdmin());
+
+      allow create, delete: if isAdmin();
+
+      // A lecturer may change ONLY the score of their own course's record,
+      // and the score must be empty or a whole number from 0 to 100.
+      allow update: if isAdmin()
+        || (signedIn()
+            && resource.data.lecturerId == request.auth.uid
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score'])
+            && (request.resource.data.score == null
+                || (request.resource.data.score is int
+                    && request.resource.data.score >= 0
+                    && request.resource.data.score <= 100)));
+    }
+
+    // ---- Course chats --------------------------------------------------
+    // Room id = course code without spaces (e.g. CSC401). A member is the
+    // course's lecturer or a student enrolled in it (enrolment ids are
+    // "<studentUid>_<roomId>"). Admins can read everything.
+    match /chatRooms/{roomId} {
+      allow read: if signedIn()
+        && (resource.data.lecturerId == request.auth.uid
+            || isAdmin()
+            || exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + roomId)));
+      allow write: if isAdmin();
+
+      match /messages/{messageId} {
+        function isMember() {
+          return signedIn()
+            && (get(/databases/$(database)/documents/chatRooms/$(roomId)).data.lecturerId == request.auth.uid
+                || exists(/databases/$(database)/documents/enrollments/$(request.auth.uid + '_' + roomId)));
+        }
+
+        allow read: if isMember() || isAdmin();
+
+        // Members post as themselves, with their real name and role.
+        allow create: if isMember()
+          && request.resource.data.keys().hasOnly(['senderId', 'senderName', 'senderRole', 'text', 'sentAt'])
+          && request.resource.data.senderId == request.auth.uid
+          && request.resource.data.senderName == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.name
+          && request.resource.data.senderRole == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000
+          && request.resource.data.sentAt == request.time;
+
+        allow update, delete: if isAdmin();
+      }
+    }
+
+    // ---- Exams (admin publishes, everyone signed in can read) -----------
+    match /exams/{id} {
+      allow read: if signedIn();
+      allow write: if isAdmin();
+    }
+
+    // ---- Study resources (links shared by lecturers) --------------------
+    // A lecturer may share only for a course they teach (checked against the
+    // course's chat room, which stores the lecturer) and only https links.
+    match /resources/{id} {
+      allow read: if signedIn();
+      allow create: if isAdmin() || (signedIn()
+        && request.resource.data.lecturerId == request.auth.uid
+        && request.resource.data.url is string
+        && request.resource.data.url.matches('https://.*')
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.createdAt == request.time
+        && get(/databases/$(database)/documents/chatRooms/$(request.resource.data.courseCode.replace(' ', ''))).data.lecturerId == request.auth.uid);
+      allow update, delete: if isAdmin()
+        || (signedIn() && resource.data.lecturerId == request.auth.uid);
+    }
+
+    // ---- Feedback box and usability survey (anonymous, admin reads) ------
+    match /feedback/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['role', 'category', 'message', 'rating', 'createdAt'])
+        && request.resource.data.role == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        && request.resource.data.category in ['bug', 'idea', 'other']
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 1000
+        && (!('rating' in request.resource.data)
+            || (request.resource.data.rating is int
+                && request.resource.data.rating >= 1
+                && request.resource.data.rating <= 5))
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+
+    match /susResponses/{id} {
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['role', 'answers', 'score', 'createdAt'])
+        && request.resource.data.role == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role
+        && request.resource.data.answers is list
+        && request.resource.data.answers.size() == 10
+        && request.resource.data.answers.hasOnly([1, 2, 3, 4, 5])
+        && request.resource.data.score is number
+        && request.resource.data.score >= 0
+        && request.resource.data.score <= 100
+        && request.resource.data.createdAt == request.time;
+      allow read, delete: if isAdmin();
+      allow update: if false;
+    }
+  }
+}

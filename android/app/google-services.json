@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "834571013691",
+    "firebase_url": "https://hill-city-portal-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "hill-city-portal",
+    "storage_bucket": "hill-city-portal.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834571013691:android:fddf6d6e7760f67e76561e",
+        "android_client_info": {
+          "package_name": "com.example.smart_campus_portal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjNJmuAPSa80p_ziU4_stFsWmXHnCI6YQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834571013691:android:70e28b43825be70c76561e",
+        "android_client_info": {
+          "package_name": "hill.city.portal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjNJmuAPSa80p_ziU4_stFsWmXHnCI6YQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
