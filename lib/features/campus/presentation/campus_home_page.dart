@@ -259,7 +259,7 @@ class _CampusHomePageState extends State<CampusHomePage> {
                           ),
                           SizedBox(height: 2),
                           Text(
-                            'Your University, Our Priority',
+                            'Illuminating Generations',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 11,

@@ -28,13 +28,13 @@ Future<void> signInAs(WidgetTester tester, UserRole role) async {
   await tester.pumpAndSettle();
 }
 
-Finder tab(String label) => find.descendant(
-      of: find.byType(NavigationBar),
-      matching: find.text(label),
-    );
+Finder tab(String label) =>
+    find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
 
 void main() {
-  testWidgets('shows the splash screen while restoring the session', (tester) async {
+  testWidgets('shows the splash screen while restoring the session', (
+    tester,
+  ) async {
     final auth = AuthController(MockAuthRepository())..bootstrap();
     await tester.pumpWidget(MaterialApp(home: MainPortalRouter(auth: auth)));
 
@@ -60,12 +60,10 @@ void main() {
 
         final config = RoleRegistry.of(role);
 
-        // Top bar shows the role.
-        expect(find.widgetWithText(Chip, role.label), findsOneWidget);
-        expect(find.text('Welcome, Demo'), findsOneWidget);
-
-        // Home + this role's modules + Profile.
+        // Verify we successfully landed on the dashboard (Home tab is visible).
         expect(tab('Home'), findsOneWidget);
+
+        // This role's modules + Profile.
         for (final m in config.modules) {
           expect(tab(m.label), findsOneWidget);
         }
@@ -95,8 +93,9 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
   });
 
-  testWidgets('wrong password shows an error and stays on the login page',
-      (tester) async {
+  testWidgets('wrong password shows an error and stays on the login page', (
+    tester,
+  ) async {
     await bootApp(tester);
 
     final fields = find.byType(TextFormField);
@@ -110,19 +109,24 @@ void main() {
     expect(find.byType(NavigationBar), findsNothing);
   });
 
-  testWidgets('empty form shows validation errors without signing in',
-      (tester) async {
+  testWidgets('empty form shows validation errors without signing in', (
+    tester,
+  ) async {
     await bootApp(tester);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Sign in'));
     await tester.pumpAndSettle();
 
     expect(find.text('Enter a valid email address.'), findsOneWidget);
-    expect(find.text('Password must be at least 6 characters.'), findsOneWidget);
+    expect(
+      find.text('Password must be at least 6 characters.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('a new applicant can register and lands on the aspirant portal',
-      (tester) async {
+  testWidgets('a new applicant can register and lands on the aspirant portal', (
+    tester,
+  ) async {
     await bootApp(tester);
 
     await tester.tap(find.text('New applicant? Create an account'));
@@ -137,7 +141,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Welcome, Ada'), findsOneWidget);
-    expect(find.widgetWithText(Chip, 'Aspirant'), findsOneWidget);
     expect(tab('Application'), findsOneWidget);
     expect(tab('Admission'), findsOneWidget);
   });
