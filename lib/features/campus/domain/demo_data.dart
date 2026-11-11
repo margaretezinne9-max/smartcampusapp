@@ -113,7 +113,7 @@ abstract final class DemoData {
       ),
       slot(
         'CSC 499',
-        'Final Year Project Defense',
+        'Final Year Project Defence',
         DateTime.thursday,
         14,
         16,
