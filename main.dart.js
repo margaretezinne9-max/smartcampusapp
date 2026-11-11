@@ -35279,7 +35279,7 @@ _.c=c
 _.d=d
 _.e=e
 _.f=f},
-bi5(a1,a2,a3,a4){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=null,d="Admin",c="Computer Science",b=new A.ak5(a1,a2),a=A.b([b.$7("CSC 401","Compiler Construction",1,8,10,"Lecture Theatre 2",B.ju),b.$7("CSC 403","Artificial Intelligence",2,10,12,"Lecture Theatre 1",B.ju),b.$7("CSC 405","Computer Networks",3,12,14,"ICT Lab 3",B.n4),b.$7("CSC 499","Final Year Project Clinic",4,14,16,"Seminar Room A",B.n4),b.$7("GST 401","Entrepreneurship Studies",5,9,11,"Lecture Theatre 3",B.ju)],t.fL),a0=A.b([],t.W9)
+bi5(a1,a2,a3,a4){var s,r,q,p,o,n,m,l,k,j,i,h,g,f,e=null,d="Admin",c="Computer Science",b=new A.ak5(a1,a2),a=A.b([b.$7("CSC 401","Compiler Construction",1,8,10,"Lecture Theatre 2",B.ju),b.$7("CSC 403","Artificial Intelligence",2,10,12,"Lecture Theatre 1",B.ju),b.$7("CSC 405","Computer Networks",3,12,14,"ICT Lab 3",B.n4),b.$7("CSC 499","Final Year Project Defense",4,14,16,"Seminar Room A",B.n4),b.$7("GST 401","Entrepreneurship Studies",5,9,11,"Lecture Theatre 3",B.ju)],t.fL),a0=A.b([],t.W9)
 for(s=a4.length,r=0;r<a4.length;a4.length===s||(0,A.w)(a4),++r){q=a4[r]
 for(p=a.length,o=q.a,n=q.b,m=o+"_",l=0;l<a.length;a.length===p||(0,A.w)(a),++l){k=a[l]
 j=k.b
